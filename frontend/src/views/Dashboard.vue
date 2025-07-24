@@ -130,7 +130,7 @@
       centered
       hide-footer
     >
-      <qr-code-generator :url="websiteUrl" />
+      <QRCodeGenerator :url="websiteUrl" />
     </b-modal>
   </div>
 </template>
