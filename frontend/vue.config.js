@@ -13,6 +13,6 @@ module.exports = defineConfig({
   },
   // Set the publicPath according to the environment
   publicPath: process.env.NODE_ENV === 'production'
-    ? '/email-analyzer/'
+    ? '/'
     : '/'
 }) 
