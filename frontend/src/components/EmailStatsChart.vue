@@ -28,13 +28,11 @@
 <script>
 import { mapState } from 'vuex';
 import VueApexCharts from 'vue-apexcharts';
-import { BIconGraphDown } from 'bootstrap-vue';
 
 export default {
   name: 'EmailStatsChart',
   components: {
-    apexchart: VueApexCharts,
-    BIconGraphDown
+    apexchart: VueApexCharts
   },
   computed: {
     ...mapState(['stats', 'loading']),
