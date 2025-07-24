@@ -4,7 +4,7 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 
 from dependencies.deps import get_db
-from schemas.email import EmailResponse, EmailAnalyzeRequest, EmailAnalyzeResponse, EmailStatsResponse, EmailBatchAnalyzeResponse
+from schemas.email import EmailResponse, EmailAnalyzeRequest, EmailAnalyzeResponse, EmailStatsResponse, EmailBatchAnalyzeResponse, EmailListResponse
 from models.email import Email
 from services.email_analyzer import EmailAnalyzer
 
@@ -54,9 +54,9 @@ async def get_email_stats(db: Session = Depends(get_db)):
         "recent_trend": trend_data
     }
 
-@router.get("/", response_model=List[EmailResponse])
+@router.get("/")
 async def get_emails(
-    category: Optional[str] = None, 
+    category: Optional[str] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db)
@@ -64,19 +64,65 @@ async def get_emails(
     """
     Lấy danh sách email với bộ lọc tùy chọn.
     """
-    query = db.query(Email)
-    
-    # Áp dụng filter nếu có
-    if category and category != "all":
-        query = query.filter(Email.category == category)
-    
-    # Sắp xếp theo thời gian nhận, mới nhất đầu tiên
-    query = query.order_by(Email.received_time.desc())
-    
-    # Phân trang
-    emails = query.offset(offset).limit(limit).all()
-    
-    return emails
+    try:
+        query = db.query(Email)
+
+        # Áp dụng filter nếu có
+        if category and category != "all":
+            query = query.filter(Email.category == category)
+
+        # Sắp xếp theo thời gian nhận, mới nhất đầu tiên
+        query = query.order_by(Email.received_time.desc())
+
+        # Lấy tổng số để tính pagination
+        total = query.count()
+
+        # Phân trang
+        emails = query.offset(offset).limit(limit).all()
+
+        # Convert SQLAlchemy objects to dict để đảm bảo serialization
+        emails_data = []
+        for email in emails:
+            email_dict = {
+                "id": email.id,
+                "title": email.title,
+                "content": email.content,
+                "from_email": email.from_email,
+                "to_email": email.to_email,
+                "received_time": email.received_time.isoformat() if email.received_time else None,
+                "category": email.category,
+                "category_id": email.category_id,
+                "suspicious_indicators": email.suspicious_indicators,
+                "confidence_score": email.confidence_score,
+                "level": email.level,
+                "created_at": email.created_at.isoformat() if email.created_at else None
+            }
+            emails_data.append(email_dict)
+
+        return {
+            "success": True,
+            "data": emails_data,
+            "pagination": {
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+                "has_next": offset + limit < total
+            },
+            "message": "Lấy danh sách email thành công"
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "data": [],
+            "pagination": {
+                "total": 0,
+                "limit": limit,
+                "offset": offset,
+                "has_next": False
+            },
+            "message": f"Lỗi khi lấy danh sách email: {str(e)}"
+        }
 
 @router.post("/analyze", response_model=EmailAnalyzeResponse)
 async def analyze_email(

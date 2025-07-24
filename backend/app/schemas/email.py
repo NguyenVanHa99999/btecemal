@@ -62,4 +62,11 @@ class EmailStatsResponse(BaseModel):
     """Response cho thống kê email"""
     total: int
     categories: Dict[str, Dict[str, Union[int, float]]]
-    recent_trend: Optional[List[Dict[str, Any]]] = None 
+    recent_trend: Optional[List[Dict[str, Any]]] = None
+
+class EmailListResponse(BaseModel):
+    """Response cho danh sách email"""
+    success: bool
+    data: List[Dict[str, Any]]
+    pagination: Dict[str, Union[int, bool]]
+    message: str

@@ -75,11 +75,31 @@ export default new Vuex.Store({
       commit('SET_LOADING', true)
       try {
         const response = await emailApi.getEmails(options)
-        commit('SET_EMAILS', response.data)
-        return response.data
+
+        // Kiểm tra nếu API trả về format mới {success, data, pagination, message}
+        if (response.data && response.data.success && Array.isArray(response.data.data)) {
+          commit('SET_EMAILS', response.data.data)
+          return {
+            emails: response.data.data,
+            pagination: response.data.pagination,
+            message: response.data.message
+          }
+        }
+        // Fallback cho format cũ (array trực tiếp)
+        else if (Array.isArray(response.data)) {
+          commit('SET_EMAILS', response.data)
+          return response.data
+        }
+        // Trường hợp lỗi
+        else {
+          console.error('Unexpected API response format:', response.data)
+          commit('SET_EMAILS', [])
+          return []
+        }
       } catch (error) {
         console.error('Error fetching emails:', error)
         commit('SET_ERROR', 'Không thể tải dữ liệu email')
+        commit('SET_EMAILS', [])
         return []
       } finally {
         commit('SET_LOADING', false)

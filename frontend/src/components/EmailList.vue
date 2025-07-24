@@ -238,6 +238,7 @@ export default {
       currentPage: 1,
       perPage: 10,
       totalRows: 0,
+      pagination: null,
       showEmailModal: false,
       selectedEmail: {},
       showAnalysisResultModal: false,  // Thêm biến cho modal kết quả phân tích
@@ -276,15 +277,25 @@ export default {
     loadEmails() {
       const offset = (this.currentPage - 1) * this.perPage;
       const category = this.selectedCategory !== 'all' ? this.selectedCategory : null;
-      
-      this.fetchEmails({ 
-        limit: this.perPage, 
-        offset, 
-        category 
-      }).then(() => {
-        this.totalRows = this.emails.length < this.perPage 
-          ? (this.currentPage - 1) * this.perPage + this.emails.length 
-          : this.currentPage * this.perPage + 10; // Ước lượng
+
+      this.fetchEmails({
+        limit: this.perPage,
+        offset,
+        category
+      }).then((result) => {
+        // Cập nhật pagination từ API response
+        if (result && result.pagination) {
+          this.pagination = result.pagination;
+          this.totalRows = result.pagination.total;
+        } else {
+          // Fallback cho format cũ
+          this.totalRows = this.emails.length < this.perPage
+            ? (this.currentPage - 1) * this.perPage + this.emails.length
+            : this.currentPage * this.perPage + 10; // Ước lượng
+        }
+      }).catch((error) => {
+        console.error('Error loading emails:', error);
+        this.totalRows = 0;
       });
     },
     
