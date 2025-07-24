@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from dependencies.deps import get_db
-from schemas.email import EmailResponse, EmailAnalyzeRequest, EmailAnalyzeResponse, EmailStatsResponse, EmailBatchAnalyzeResponse, EmailListResponse
-from models.email import Email
-from services.email_analyzer import EmailAnalyzer
+from app.dependencies.deps import get_db
+from app.schemas.email import EmailResponse, EmailAnalyzeRequest, EmailAnalyzeResponse, EmailStatsResponse, EmailBatchAnalyzeResponse, EmailListResponse
+from app.models.email import Email
+from app.services.email_analyzer import EmailAnalyzer
 
 router = APIRouter()
 email_analyzer = EmailAnalyzer()

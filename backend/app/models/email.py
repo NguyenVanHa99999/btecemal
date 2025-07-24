@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Float, JSON
 from sqlalchemy.sql import func
-from database.session import Base
+from app.database.session import Base
 
 class Email(Base):
     """
