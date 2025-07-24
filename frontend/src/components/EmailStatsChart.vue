@@ -12,17 +12,13 @@
         </div>
       </b-tab>
       <b-tab title="Xu hướng">
-        <div v-if="stats.recent_trend && stats.recent_trend.length > 0" class="chart-container">
+        <div class="chart-container">
           <apexchart
-            type="area"
+            type="bar"
             height="320"
-            :options="trendChartOptions"
-            :series="trendChartSeries"
+            :options="columnChartOptions"
+            :series="columnChartSeries"
           ></apexchart>
-        </div>
-        <div v-else class="text-center p-5">
-          <b-icon-graph-down font-scale="3"></b-icon-graph-down>
-          <p class="mt-3">Không đủ dữ liệu để hiển thị xu hướng</p>
         </div>
       </b-tab>
     </b-tabs>
@@ -108,70 +104,52 @@ export default {
         ]
       };
     },
-    
-    trendChartSeries() {
-      if (!this.stats || !this.stats.recent_trend || this.stats.recent_trend.length === 0) {
-        return [];
-      }
-      
-      return [
-        {
-          name: 'An toàn',
-          data: this.stats.recent_trend.map(day => day.safe || 0)
-        },
-        {
-          name: 'Đáng ngờ',
-          data: this.stats.recent_trend.map(day => day.suspicious || 0)
-        },
-        {
-          name: 'Spam',
-          data: this.stats.recent_trend.map(day => day.spam || 0)
-        },
-        {
-          name: 'Lừa đảo',
-          data: this.stats.recent_trend.map(day => day.phishing || 0)
-        },
-        {
-          name: 'Chưa phân loại',
-          data: this.stats.recent_trend.map(day => day.unknown || 0)
-        }
-      ];
+
+    // Biểu đồ cột cho phân loại email
+    columnChartSeries() {
+      return [{
+        name: 'Số lượng email',
+        data: [
+          this.stats.categories?.safe?.count || 0,
+          this.stats.categories?.suspicious?.count || 0,
+          this.stats.categories?.spam?.count || 0,
+          this.stats.categories?.phishing?.count || 0,
+          this.stats.categories?.unknown?.count || 0
+        ]
+      }];
     },
-    
-    trendChartOptions() {
+
+    columnChartOptions() {
       return {
         chart: {
-          type: 'area',
+          type: 'bar',
           height: 320,
           fontFamily: 'Roboto, sans-serif',
           toolbar: {
             show: false
-          },
-          zoom: {
-            enabled: false
           }
         },
         colors: ['#28a745', '#ffc107', '#6c757d', '#dc3545', '#17a2b8'],
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded',
+            distributed: true // Mỗi cột có màu khác nhau
+          }
+        },
         dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'smooth',
-          width: 2
-        },
-        fill: {
-          type: 'gradient',
-          gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.7,
-            opacityTo: 0.3,
-            stops: [0, 90, 100]
+          enabled: true,
+          formatter: function (val) {
+            return val + ' email';
           }
         },
         xaxis: {
-          categories: this.stats.recent_trend ? this.stats.recent_trend.map(day => this.formatDate(day.date)) : [],
-          tooltip: {
-            enabled: false
+          categories: ['An toàn', 'Đáng ngờ', 'Spam', 'Lừa đảo', 'Chưa phân loại'],
+          labels: {
+            style: {
+              fontSize: '12px'
+            }
           }
         },
         yaxis: {
@@ -182,12 +160,9 @@ export default {
           }
         },
         legend: {
-          position: 'top',
-          horizontalAlign: 'center',
-          offsetY: 0
+          show: false // Ẩn legend vì đã có label trên trục x
         },
         tooltip: {
-          shared: true,
           y: {
             formatter: (value) => {
               return `${value} email`;
