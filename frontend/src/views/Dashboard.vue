@@ -2,7 +2,16 @@
   <div>
     <h1 class="mb-4">
       Tổng quan hệ thống
-      <span class="float-right">
+      <span class="float-right d-flex align-items-center">
+        <b-button
+          variant="outline-primary"
+          size="sm"
+          class="mr-3"
+          @click="showQRModal = true"
+        >
+          <b-icon-qr-code class="mr-1"></b-icon-qr-code>
+          Chia sẻ QR
+        </b-button>
         <b-form-checkbox v-model="autoRefresh" switch size="lg" class="mt-2">
           <span :class="{'text-success': autoRefresh}">Tự động cập nhật</span>
           <b-badge v-if="autoRefresh" variant="light" class="ml-1">{{ autoRefreshCountdown }}s</b-badge>
@@ -110,8 +119,19 @@
     </h2>
 
     <b-alert :show="!!error" variant="danger">{{ error }}</b-alert>
-    
+
     <email-list ref="emailList" :selectedCategory="activeCategory" />
+
+    <!-- QR Code Modal -->
+    <b-modal
+      v-model="showQRModal"
+      title="Chia sẻ Website Email Analyzer"
+      size="md"
+      centered
+      hide-footer
+    >
+      <qr-code-generator :url="websiteUrl" />
+    </b-modal>
   </div>
 </template>
 
@@ -119,12 +139,14 @@
 import { mapState, mapActions } from 'vuex';
 import EmailStatsChart from '@/components/EmailStatsChart.vue';
 import EmailList from '@/components/EmailList.vue';
+import QRCodeGenerator from '@/components/QRCodeGenerator.vue';
 
 export default {
   name: 'DashboardView',
   components: {
     EmailStatsChart,
-    EmailList
+    EmailList,
+    QRCodeGenerator
   },
   data() {
     return {
@@ -134,7 +156,9 @@ export default {
       autoRefreshInterval: null,
       autoRefreshCountdown: 30,
       autoRefreshTime: 30000, // 30 giây
-      activeCategory: 'all' // Danh mục hiện tại đang được lọc
+      activeCategory: 'all', // Danh mục hiện tại đang được lọc
+      showQRModal: false,
+      websiteUrl: 'https://email-analyzer-frontend.onrender.com'
     };
   },
   computed: {
@@ -250,5 +274,22 @@ export default {
 .active-filter {
   background-color: rgba(0, 123, 255, 0.1);
   font-weight: bold;
+}
+
+/* Responsive QR button */
+@media (max-width: 768px) {
+  .float-right {
+    float: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .float-right .d-flex {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 </style> 
