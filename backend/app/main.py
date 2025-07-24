@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import emails
+from .routes import emails
 
 # Khởi tạo ứng dụng FastAPI
 app = FastAPI(
