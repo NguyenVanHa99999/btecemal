@@ -14,8 +14,8 @@
       <b-tab title="Xu hướng">
         <div v-if="stats.recent_trend && stats.recent_trend.length > 0" class="chart-container">
           <apexchart
-            type="bar"
-            height="350"
+            type="area"
+            height="320"
             :options="trendChartOptions"
             :series="trendChartSeries"
           ></apexchart>
@@ -141,197 +141,67 @@ export default {
     trendChartOptions() {
       return {
         chart: {
-          type: 'bar',
-          height: 350,
+          type: 'area',
+          height: 320,
           fontFamily: 'Roboto, sans-serif',
           toolbar: {
-            show: true,
-            tools: {
-              download: true,
-              selection: false,
-              zoom: false,
-              zoomin: false,
-              zoomout: false,
-              pan: false,
-              reset: false
-            }
+            show: false
           },
-          animations: {
-            enabled: true,
-            easing: 'easeinout',
-            speed: 800
+          zoom: {
+            enabled: false
           }
         },
         colors: ['#28a745', '#ffc107', '#6c757d', '#dc3545', '#17a2b8'],
-        plotOptions: {
-          bar: {
-            horizontal: false,
-            columnWidth: '60%',
-            endingShape: 'rounded',
-            borderRadius: 4,
-            dataLabels: {
-              position: 'top'
-            }
-          }
-        },
         dataLabels: {
-          enabled: true,
-          formatter: function (val) {
-            return val > 0 ? val : '';
-          },
-          offsetY: -20,
-          style: {
-            fontSize: '10px',
-            colors: ['#304758'],
-            fontWeight: 'bold'
-          }
+          enabled: false
         },
         stroke: {
-          show: true,
-          width: 2,
-          colors: ['transparent']
+          curve: 'smooth',
+          width: 2
         },
-        grid: {
-          show: true,
-          borderColor: '#e7e7e7',
-          strokeDashArray: 3,
-          position: 'back',
-          xaxis: {
-            lines: {
-              show: false
-            }
-          },
-          yaxis: {
-            lines: {
-              show: true
-            }
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.7,
+            opacityTo: 0.3,
+            stops: [0, 90, 100]
           }
         },
         xaxis: {
           categories: this.stats.recent_trend ? this.stats.recent_trend.map(day => this.formatDate(day.date)) : [],
-          axisBorder: {
-            show: true,
-            color: '#e7e7e7'
-          },
-          axisTicks: {
-            show: true,
-            color: '#e7e7e7'
-          },
-          labels: {
-            style: {
-              colors: '#6c757d',
-              fontSize: '12px',
-              fontWeight: 500
-            }
-          },
-          title: {
-            text: 'Ngày',
-            style: {
-              color: '#6c757d',
-              fontSize: '13px',
-              fontWeight: 600
-            }
+          tooltip: {
+            enabled: false
           }
         },
         yaxis: {
-          min: 0,
-          forceNiceScale: true,
           labels: {
             formatter: (value) => {
               return Math.floor(value);
-            },
-            style: {
-              colors: '#6c757d',
-              fontSize: '12px'
-            }
-          },
-          title: {
-            text: 'Số lượng email',
-            style: {
-              color: '#6c757d',
-              fontSize: '13px',
-              fontWeight: 600
             }
           }
         },
         legend: {
           position: 'top',
           horizontalAlign: 'center',
-          offsetY: -10,
-          fontSize: '12px',
-          fontWeight: 500,
-          markers: {
-            width: 12,
-            height: 12,
-            radius: 3
-          },
-          itemMargin: {
-            horizontal: 15,
-            vertical: 5
-          }
+          offsetY: 0
         },
         tooltip: {
           shared: true,
-          intersect: false,
-          theme: 'light',
-          style: {
-            fontSize: '12px'
-          },
           y: {
             formatter: (value) => {
               return `${value} email`;
             }
-          },
-          marker: {
-            show: true
           }
-        },
-        responsive: [
-          {
-            breakpoint: 768,
-            options: {
-              chart: {
-                height: 300
-              },
-              plotOptions: {
-                bar: {
-                  columnWidth: '70%'
-                }
-              },
-              legend: {
-                position: 'bottom',
-                offsetY: 10
-              },
-              dataLabels: {
-                enabled: false
-              }
-            }
-          }
-        ]
+        }
       };
     }
   },
   methods: {
     formatDate(dateStr) {
       if (!dateStr) return '';
-      const date = new Date(dateStr);
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      // Kiểm tra nếu là hôm nay
-      if (date.toDateString() === today.toDateString()) {
-        return 'Hôm nay';
-      }
-
-      // Kiểm tra nếu là hôm qua
-      if (date.toDateString() === yesterday.toDateString()) {
-        return 'Hôm qua';
-      }
-
-      // Hiển thị ngày/tháng cho các ngày khác
       const options = { day: '2-digit', month: '2-digit' };
-      return date.toLocaleDateString('vi-VN', options);
+      return new Date(dateStr).toLocaleDateString('vi-VN', options);
     }
   }
 };
